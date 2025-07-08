@@ -46,7 +46,7 @@ g++ -std=c++17 -I. -Isrc src/*.cpp -o chess_engine
    - `save` - Show current position (FEN)
    - `quit` - Exit the game
 
-## Architecture
+## File Structure
 
 ```
 src/
@@ -84,7 +84,7 @@ g++ -std=c++17 -I. -Isrc src/board.cpp src/movegen.cpp src/eval.cpp src/search.c
 - **Search Depth**: Configurable (default: 6 ply)
 - **Time Control**: Configurable thinking time
 
-## 🔧 Configuration
+## Configuration
 
 The engine supports various command-line options:
 
