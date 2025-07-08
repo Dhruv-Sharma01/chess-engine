@@ -97,16 +97,16 @@ SearchResult SearchEngine::iterativeDeepening(Board& board, bool white_player) {
 int SearchEngine::alphaBeta(Board& board, int depth, int alpha, int beta, bool maximizing_player) {
     nodes_searched_++;
 
-    if (isTimeUp()) {
-        return 0; // Return neutral score if time is up
+    if (isTimeUp() || depth < 0) {
+        return Evaluator::evaluate(board, maximizing_player);
     }
 
     // Check for terminal positions
-    if (board.isCheckmate(!maximizing_player)) {
-        return maximizing_player ? MATE_SCORE + depth : -MATE_SCORE - depth;
+    if (board.isCheckmate(maximizing_player)) {
+        return maximizing_player ? -MATE_SCORE - depth : MATE_SCORE + depth;
     }
 
-    if (board.isStalemate(!maximizing_player) || depth == 0) {
+    if (board.isStalemate(maximizing_player) || depth == 0) {
         if (depth == 0) {
             return quiescenceSearch(board, alpha, beta, maximizing_player);
         }
@@ -120,13 +120,13 @@ int SearchEngine::alphaBeta(Board& board, int depth, int alpha, int beta, bool m
         return tt_score;
     }
 
-    auto legal_moves = MoveGenerator::generateLegalMoves(board, !maximizing_player);
+    auto legal_moves = MoveGenerator::generateLegalMoves(board, maximizing_player);
     if (legal_moves.empty()) {
-        return board.isInCheck(!maximizing_player) ?
-               (maximizing_player ? MATE_SCORE + depth : -MATE_SCORE - depth) : 0;
+        return board.isInCheck(maximizing_player) ?
+               (maximizing_player ? -MATE_SCORE - depth : MATE_SCORE + depth) : 0;
     }
 
-    auto ordered_moves = orderMoves(board, legal_moves, !maximizing_player);
+    auto ordered_moves = orderMoves(board, legal_moves, maximizing_player);
     std::string best_move;
 
     if (maximizing_player) {
@@ -138,7 +138,7 @@ int SearchEngine::alphaBeta(Board& board, int depth, int alpha, int beta, bool m
             Board temp_board = board.copy();
             if (!temp_board.makeMove(move)) continue;
 
-            int eval = alphaBeta(temp_board, depth - 1, alpha, beta, false);
+            int eval = alphaBeta(temp_board, depth - 1, alpha, beta, !maximizing_player);
 
             if (eval > max_eval) {
                 max_eval = eval;
@@ -165,7 +165,7 @@ int SearchEngine::alphaBeta(Board& board, int depth, int alpha, int beta, bool m
             Board temp_board = board.copy();
             if (!temp_board.makeMove(move)) continue;
 
-            int eval = alphaBeta(temp_board, depth - 1, alpha, beta, true);
+            int eval = alphaBeta(temp_board, depth - 1, alpha, beta, !maximizing_player);
 
             if (eval < min_eval) {
                 min_eval = eval;
@@ -204,7 +204,7 @@ int SearchEngine::quiescenceSearch(Board& board, int alpha, int beta, bool maxim
     }
 
     // Generate only capture moves for quiescence search
-    auto legal_moves = MoveGenerator::generateLegalMoves(board, !maximizing_player);
+    auto legal_moves = MoveGenerator::generateLegalMoves(board, maximizing_player);
     std::vector<std::string> capture_moves;
 
     for (const auto& move : legal_moves) {
@@ -223,7 +223,7 @@ int SearchEngine::quiescenceSearch(Board& board, int alpha, int beta, bool maxim
         return stand_pat;
     }
 
-    auto ordered_captures = orderMoves(board, capture_moves, !maximizing_player);
+    auto ordered_captures = orderMoves(board, capture_moves, maximizing_player);
 
     if (maximizing_player) {
         for (const auto& move : ordered_captures) {
@@ -232,7 +232,7 @@ int SearchEngine::quiescenceSearch(Board& board, int alpha, int beta, bool maxim
             Board temp_board = board.copy();
             if (!temp_board.makeMove(move)) continue;
 
-            int eval = quiescenceSearch(temp_board, alpha, beta, false);
+            int eval = quiescenceSearch(temp_board, alpha, beta, !maximizing_player);
             alpha = std::max(alpha, eval);
 
             if (beta <= alpha) break;
@@ -245,7 +245,7 @@ int SearchEngine::quiescenceSearch(Board& board, int alpha, int beta, bool maxim
             Board temp_board = board.copy();
             if (!temp_board.makeMove(move)) continue;
 
-            int eval = quiescenceSearch(temp_board, alpha, beta, true);
+            int eval = quiescenceSearch(temp_board, alpha, beta, !maximizing_player);
             beta = std::min(beta, eval);
 
             if (beta <= alpha) break;
@@ -362,5 +362,13 @@ bool SearchEngine::probeTransposition(const std::string& position_key, int depth
 }
 
 std::string SearchEngine::getPositionKey(const Board& board) const {
-    return board.toFEN();
+    // Simple position key based on board state
+    std::string key;
+    for (int row = 0; row < 8; row++) {
+        for (int col = 0; col < 8; col++) {
+            key += board.getPiece(row, col);
+        }
+    }
+    key += board.isWhiteToMove() ? "w" : "b";
+    return key;
 }

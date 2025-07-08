@@ -92,8 +92,6 @@ void ChessInterface::displayHelp() {
     std::cout << "moves      - Show all legal moves\n";
     std::cout << "new        - Start a new game\n";
     std::cout << "undo       - Undo last move\n";
-    std::cout << "save       - Save current position (FEN)\n";
-    std::cout << "load <fen> - Load position from FEN\n";
     std::cout << "quit       - Exit the game\n";
     std::cout << "\n=== MOVE FORMAT ===\n";
     std::cout << "Long notation: e2e4, g1f3, e1g1 (castling)\n";
@@ -107,8 +105,6 @@ void ChessInterface::displayGameState() {
     if (board_->isInCheck(board_->isWhiteToMove())) {
         std::cout << "\n*** CHECK! ***\n";
     }
-
-    std::cout << "\nFEN: " << board_->toFEN() << "\n";
 }
 
 bool ChessInterface::handleHumanMove() {
@@ -133,16 +129,7 @@ bool ChessInterface::handleHumanMove() {
     } else if (input == "undo") {
         undoMove();
         return true;
-    } else if (input == "save") {
-        savePosition();
-        return true;
-    } else if (input.substr(0, 4) == "load") {
-        if (input.length() > 5) {
-            loadPosition(input.substr(5));
-        } else {
-            std::cout << "Usage: load <FEN string>\n";
-        }
-        return true;
+    // save and load commands removed
     } else if (input == "quit" || input == "exit") {
         return false; // Exit game
     }
@@ -290,21 +277,7 @@ void ChessInterface::newGame() {
     std::cout << "New game started.\n";
 }
 
-void ChessInterface::loadPosition(const std::string& fen) {
-    try {
-        delete board_;
-        board_ = new Board(fen);
-        game_over_ = false;
-        std::cout << "Position loaded successfully.\n";
-    } catch (...) {
-        board_ = new Board(); // Fallback to starting position
-        std::cout << "Invalid FEN. Starting new game instead.\n";
-    }
-}
-
-void ChessInterface::savePosition() {
-    std::cout << "Current position (FEN): " << board_->toFEN() << "\n";
-}
+// loadPosition() and savePosition() functions removed
 
 void ChessInterface::undoMove() {
     std::cout << "Undo not implemented yet.\n";

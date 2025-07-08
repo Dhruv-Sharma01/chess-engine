@@ -9,7 +9,7 @@ A Defensive chess engine written in C++ featuring alpha-beta pruning, comprehens
 - **Transposition Tables** - Position caching for improved performance
 - **Complete Move Generation** - All piece types, castling, en passant, promotion
 - **Legal Move Validation** - Proper check detection and evasion
-- **FEN Notation Support** - Load and save positions
+- **Position Management** - New game and move history
 - **Command-Line Interface** - User-friendly terminal interaction
 
 ## Quick Start
@@ -43,7 +43,6 @@ g++ -std=c++17 -I. -Isrc src/*.cpp -o chess_engine
    - `help` - Show available commands
    - `moves` - Display all legal moves
    - `new` - Start a new game
-   - `save` - Show current position (FEN)
    - `quit` - Exit the game
 
 ## File Structure

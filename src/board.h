@@ -30,11 +30,9 @@ private:
 
 public:
     Board();
-    explicit Board(const std::string& fen);
 
     // Board display
     void print() const;
-    std::string toFEN() const;
 
     // Position queries
     char getPiece(int row, int col) const;

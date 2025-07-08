@@ -1,7 +1,6 @@
 #include "board.h"
 #include "movegen.h"
 #include <iostream>
-#include <sstream>
 #include <algorithm>
 #include <cctype>
 
@@ -31,40 +30,7 @@ Board::Board() {
     fullmove_number_ = 1;
 }
 
-Board::Board(const std::string& fen) {
-    // Parse FEN notation
-    std::istringstream iss(fen);
-    std::string board_part, active_color, castling, en_passant, halfmove, fullmove;
-
-    iss >> board_part >> active_color >> castling >> en_passant >> halfmove >> fullmove;
-
-    // Parse board position
-    board_.clear();
-    board_.resize(8, std::string(8, '.'));
-
-    int row = 0, col = 0;
-    for (char c : board_part) {
-        if (c == '/') {
-            row++;
-            col = 0;
-        } else if (std::isdigit(c)) {
-            col += (c - '0');
-        } else {
-            board_[row][col] = c;
-            col++;
-        }
-    }
-
-    // Parse game state
-    white_to_move_ = (active_color == "w");
-    white_can_castle_kingside_ = castling.find('K') != std::string::npos;
-    white_can_castle_queenside_ = castling.find('Q') != std::string::npos;
-    black_can_castle_kingside_ = castling.find('k') != std::string::npos;
-    black_can_castle_queenside_ = castling.find('q') != std::string::npos;
-    en_passant_target_ = en_passant;
-    halfmove_clock_ = std::stoi(halfmove);
-    fullmove_number_ = std::stoi(fullmove);
-}
+// FEN constructor removed - use default constructor instead
 
 void Board::print() const {
     std::cout << "\n  a b c d e f g h\n";
@@ -305,49 +271,7 @@ bool Board::isPathClear(int from_row, int from_col, int to_row, int to_col) cons
     return true;
 }
 
-std::string Board::toFEN() const {
-    std::string fen;
-
-    // Board position
-    for (int i = 0; i < 8; i++) {
-        int empty_count = 0;
-        for (int j = 0; j < 8; j++) {
-            if (board_[i][j] == '.') {
-                empty_count++;
-            } else {
-                if (empty_count > 0) {
-                    fen += std::to_string(empty_count);
-                    empty_count = 0;
-                }
-                fen += board_[i][j];
-            }
-        }
-        if (empty_count > 0) {
-            fen += std::to_string(empty_count);
-        }
-        if (i < 7) fen += '/';
-    }
-
-    // Active color
-    fen += white_to_move_ ? " w " : " b ";
-
-    // Castling rights
-    std::string castling;
-    if (white_can_castle_kingside_) castling += 'K';
-    if (white_can_castle_queenside_) castling += 'Q';
-    if (black_can_castle_kingside_) castling += 'k';
-    if (black_can_castle_queenside_) castling += 'q';
-    if (castling.empty()) castling = "-";
-    fen += castling + " ";
-
-    // En passant target
-    fen += en_passant_target_ + " ";
-
-    // Halfmove clock and fullmove number
-    fen += std::to_string(halfmove_clock_) + " " + std::to_string(fullmove_number_);
-
-    return fen;
-}
+// toFEN() function removed
 
 bool Board::isCheckmate(bool white_player) const {
     if (!isInCheck(white_player)) return false;

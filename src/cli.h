@@ -50,8 +50,6 @@ public:
 
     // Game control
     void newGame();
-    void loadPosition(const std::string& fen);
-    void savePosition();
     void undoMove();
     void quit();
 };
